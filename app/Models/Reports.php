@@ -21,6 +21,7 @@ class Reports extends Model
         'viewers',
         'image',
         'statement',
+        'checkbox',
     ];
 
     protected $casts = [
@@ -33,15 +34,15 @@ class Reports extends Model
         return $this->belongsTo(User::class);
     }
 
-    // Relasi ke Comments
-    // public function comments()
-    // {
-    //     return $this->hasMany(Comment::class, 'report_id');
-    // }
+    public function comments()
+    {
+        return $this->hasMany(Comment::class, 'report_id'); // Ensure the correct foreign key is used
+    }
 
-    // Relasi ke Responses
     public function responses()
     {
         return $this->hasMany(Response::class);
     }
+
+    
 }

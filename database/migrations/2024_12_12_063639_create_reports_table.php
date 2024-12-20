@@ -18,9 +18,10 @@ class CreateReportsTable extends Migration
             $table->string('subdistrict', 255);
             $table->string('village', 255);
             $table->json('voting')->nullable();
-            $table->integer('viewers')->default(0);
+            $table->integer('viewers')->default();
             $table->string('image', 255)->nullable();
             $table->boolean('statement')->default(false);
+            $table->boolean('checkbox')->default(false);
             $table->timestamps();
         });
     }

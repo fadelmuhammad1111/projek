@@ -18,29 +18,38 @@ class LoginController extends Controller
 
     // Menangani proses login
     public function login(Request $request)
-{
-    $request->validate([
-        'email' => 'required|email',
-        'password' => 'required',
-    ]);
+    {
+        $request->validate([
+            'email' => 'required|email',
+            'password' => 'required',
+        ]);
 
-    $user = $request->only(['email', 'password']);
-        if(Auth::attempt($user)) {
-            return redirect()->route('akun.index')->with('success', 'Login Telah Berhasil');
-        }else {
-            return redirect()->back()->with('failed', 'Proses login gagal, silahkan coba kembali dengan data yang benar!');
+        // Cek jika pengguna sudah ada di database
+        $user = User::where('email', $request->email)->first();
+
+        if ($user) {
+            // Jika pengguna ditemukan, coba autentikasi
+            if (Auth::attempt($request->only('email', 'password'))) {
+                return redirect()->route('akun.index')->with('success', 'Login berhasil.');
+            } else {
+                return redirect()->back()->with('failed', 'Proses login gagal, silakan coba lagi dengan data yang benar.');
+            }
+        } else {
+            // Jika pengguna belum terdaftar, buat akun sebagai guest
+            $guestData = [
+                'email' => $request->email,
+                'password' => bcrypt($request->password), // Hash password
+            ];
+
+            $guestUser = User::create($guestData);
+
+            // Autentikasi pengguna baru sebagai guest
+            Auth::login($guestUser);
+
+            return redirect()->route('akun.index')->with('success', 'Akun Anda terdaftar sebagai tamu, login berhasil.');
         }
-
-    $credentials = $request->only('email', 'password');
-
-    
-
-    // Jika pengguna belum terdaftar, buat akun baru
-    
-
-    // Login otomatis setelah registrasi
-    
     }
+
 
     // Menangani logout
     public function logout(Request $request)

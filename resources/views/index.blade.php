@@ -4,6 +4,7 @@
     <title>
         Pengaduan
     </title>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet" />
     <style>
         body {
@@ -100,6 +101,11 @@
             color: #555;
         }
 
+        .post-content a {
+            text-decoration: none;
+            color: black;
+        }
+
         .post-content .meta {
             display: flex;
             align-items: center;
@@ -175,7 +181,24 @@
             font-size: 20px;
         }
 
-        
+        .floating-buttons a {
+            color: white;
+        }
+
+        .like-button {
+            cursor: pointer;
+            color: gray;
+        }
+
+        .like-button.liked {
+            color: red;
+        }
+
+        span .like-count {
+            color: gray;
+            font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif
+        }
+
     </style>
 </head>
 
@@ -193,39 +216,34 @@
                             <option value="{{ $item['id'] }}">{{ $item['name'] }}</option>
                         @endforeach
                     </select>
-                    <button type = "submit">
+                <button type = "submit">
                         Pilih
                     </button>
                 </form>
                 
             </div>
             @foreach ($Reports as $report)
-            <div class="post">
-                <img alt="Construction vehicles working on a road" height="100"
-                    src="{{ asset('storage/' . $report->image) }}" {{--menentukan sumber gambar --}}
-                    width="150" />
+            <div class="post" data-id="{{ $report->id }}">
+                <img alt="..." src="{{ asset('storage/' . $report->image) }}" width="150" height="100" />
                 <div class="post-content">
-                    <h3>
-                        {{ $report->description }}
-                    </h3>
+                    <a href="{{ route('detail.show', ['id' => $report->id]) }}">
+                        <h3>{{ $report->description }}</h3>
+                    </a>
                     <div class="meta">
                         <span>
-                            <i class="fas fa-eye">
+                            <i class="fas fa-eye"></i>
+                            <span class="view-count">{{ $report->viewers }}</span>
+                        </span>
+                        <span>
+                            <i class="fas fa-heart like-button {{ in_array(auth()->id(), json_decode($report->voting ?? '[]')) ? 'liked' : '' }}" data-id="{{ $report->id }}"> <span class="like-count">{{ $report->likes }}</span>
                             </i>
-                            38
                         </span>
-                        <span>
-                            <i class="fas fa-heart"></i>
-                            </span>
-                            <span>
-                            {{ $report->user->email }}
-                        </span>
-                        <span>
-                            {{ \Carbon\Carbon::parse($report->created_at)->diffForHumans() }}
-                        </span>
+                        <span>{{ $report->user->email }}</span>
+                        <span>{{ \Carbon\Carbon::parse($report->created_at)->diffForHumans() }}</span>
                     </div>
                 </div>
             </div>
+
             @endforeach
         </div>
         <div class="sidebar">
@@ -269,8 +287,10 @@
             </i>
         </button>
         <button>
-            <i class="fas fa-exclamation">
-            </i>
+            <a href="{{ route('akun.monitoring') }}">
+                        <i class="fas fa-exclamation">
+                        </i>
+                    </a>
         </button>
         <a href="{{ route('akun.create') }}">
         <button>
@@ -279,5 +299,93 @@
         </button>
     </a>
     </div>
+    <script>
+        async function postData(url, data) {
+    try {
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+            },
+            body: JSON.stringify(data),
+        });
+        return response.json();
+    } catch (error) {
+        console.error('Error:', error);
+        return null;
+    }
+}
+
+document.querySelectorAll('.like-button').forEach(button => {
+    button.addEventListener('click', async function () {
+        const reportId = this.getAttribute('data-id');
+        const response = await postData(`/akun/reports/${reportId}/like`, {});
+        if (response && response.success) {
+            this.querySelector('.like-count').textContent = response.likes;
+        } else {
+            alert(response ? response.message : 'Failed to like the report.');
+        }
+    });
+});
+
+// Update view count saat laporan detail dibuka
+async function updateViewCount(reportId) {
+    try {
+        const response = await fetch(`/reports/${reportId}/view`, {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+            },
+        });
+
+        const data = await response.json();
+        if (data.success) {
+            const viewCount = document.querySelector(`.post[data-id="${reportId}"] .view-count`);
+            viewCount.textContent = data.viewers; // Update view count
+        }
+    } catch (error) {
+        console.error('Error updating view count:', error);
+    }
+}
+
+// Tambahkan event listener di semua post-content links (link menuju halaman detail)
+    document.querySelectorAll('.post-content a').forEach(link => {
+        link.addEventListener('click', async function(event) {
+            event.preventDefault(); // Mencegah pemuatan halaman baru
+            const reportId = this.closest('.post').getAttribute('data-id');
+            
+            // Update view count tanpa reload halaman
+            await updateViewCount(reportId);
+            
+            // Arahkan ke halaman detail
+            window.location.href = this.href;
+        });
+    });
+
+    async function updateViewCount(reportId) {
+        try {
+            const response = await fetch(`/reports/${reportId}/view`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                },
+            });
+
+            const data = await response.json();
+            if (data.success) {
+                const viewCountElement = document.querySelector(`.post[data-id="${reportId}"] .view-count`);
+                viewCountElement.textContent = data.viewers; // Update view count
+            }
+        } catch (error) {
+            console.error('Error updating view count:', error);
+        }
+    }
+
+
+
+
+
+    </script>
 </body>
 </html>

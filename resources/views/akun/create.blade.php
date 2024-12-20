@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <title>Form Lokasi</title>
     <style>
         body {
@@ -38,33 +39,31 @@
             font-weight: bold;
         }
 
-        .floating-icons {
+        .floating-buttons {
             position: fixed;
-            top: 50%;
+            bottom: 20px;
             right: 20px;
-            transform: translateY(-50%);
             display: flex;
             flex-direction: column;
-            gap: 15px;
         }
 
-        .icon {
+        .floating-buttons button {
+            background-color: #a9a9a9;
+            color: white;
+            border: none;
+            border-radius: 50%;
             width: 50px;
             height: 50px;
-            border-radius: 50%;
-            background-color: #cccccc;
+            margin-bottom: 10px;
+            cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: white;
-            font-size: 1.5rem;
-            cursor: pointer;
-            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.15);
+            font-size: 20px;
         }
 
-        .icon a {
-            text-decoration: none;
-            color: black;
+        .floating-buttons a {
+            color: white;
         }
 
         .icon:hover {
@@ -125,7 +124,7 @@
                 </div>
                 <div class="mb-3">
                     <label for="descript" class="form-label">Detail Keluhan</label>
-                    <input type="text" class="form-control" name="description" id="descript">
+                    <textarea class="form-control" name="description" id="descript" rows="4"></textarea>
                 </div>
                 <div>
                     <input type="file" id="file" name="image" />
@@ -139,10 +138,23 @@
         </form>
     </div>
     </form>
-    <div class="floating-icons">
-        <div class="icon"><a href="/home">🏠︎</a></div>
-        <div class="icon"><a href="#">!</a></div>
-        <div class="icon"><a href="{{ route('akun.create') }}">🖉</a></div>
+    <div class="floating-buttons">
+        <button>
+            <a href="{{ route('akun.index') }}">
+                <i class="fas fa-home">
+                </i>
+        </button>
+        <button>
+            <a href="{{ route('akun.monitoring') }}">
+                <i class="fas fa-exclamation">
+                </i></a>
+        </button>
+        <button>
+            <a href="{{ route('akun.create') }}">
+                <i class="fas fa-pen">
+                </i>
+        </button>
+        </a>
     </div>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>

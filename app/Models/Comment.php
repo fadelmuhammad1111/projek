@@ -12,16 +12,17 @@ class Comment extends Model
     protected $fillable = [
         'report_id',
         'user_id',
-        'comment',
+        'content',
+        'comments',
     ];
 
     // Relasi ke Report
     public function report()
     {
-        return $this->belongsTo(Report::class);
+        return $this->belongsTo(Report::class, 'report_id'); // Ensure the correct foreign key is used
     }
 
-    // Relasi ke User
+
     public function user()
     {
         return $this->belongsTo(User::class);

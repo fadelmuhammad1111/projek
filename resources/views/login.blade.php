@@ -107,11 +107,16 @@
     <div class="login-container">
         <h1>Login</h1>
 
-        @if ($errors->any())
-            <div class="error">
-                {{ $errors->first() }}
-            </div>
+        @if (session('success'))
+            <div class="alert alert-success">{{ session('success') }}</div>
         @endif
+        @if (session('failed'))
+            <div class="alert alert-danger">{{ session('failed') }}</div>
+        @endif
+        @if ($errors->any())
+            <div class="alert alert-danger">{{ $errors->first() }}</div>
+        @endif
+
 
         <form action="{{ route('login.auth') }}" method="POST" class="login-form">
             @csrf
@@ -125,7 +130,7 @@
             </div>
             <div class="btn-container">
                 <button type="submit" class="btn">Login</button>
-                <button type="button" class="btn">Buat Akun</button>
+                <button type="submit" class="btn">Buat Akun</button>
             </div>
         </form>
 
